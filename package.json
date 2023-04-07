@@ -6,7 +6,7 @@
     "bundle": "npx webpack",
     "build": "rescript build",
     "watch": "rescript build -w",
-    "serve": "npx webpack -serve"
+    "serve": "npx webpack serve"
   },
   "keywords": [
     "ReScript"
