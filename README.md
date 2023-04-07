@@ -4,6 +4,8 @@ The biggest impediment for hiking in washington state is the weather. We have to
 
 Ramble does the following (1) maintains a database of all zip codes of washington state where there are trails (2) queries the weather api to find forecast of places where its "not raining/snowing/windy" and recommends hikes in those zip codes.
 
+Ramble also allows users to create a personal list of favorite places to hike. The results of these zip codes are bubbled up so that users can quickly see the weather forecast for their favorite places. By default ramble optimes the search results for weekends, but users can pick a favorite day (ex: Tuesday) to hike and these results are bubbled up as well.
+
 The objective is to save time and quickly find a place to hike!
 
 Ramble uses Free open-source API [open-meteo](https://open-meteo.com) as the data source. 
