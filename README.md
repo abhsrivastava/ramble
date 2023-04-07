@@ -35,3 +35,7 @@ npm run serve
 # Future roadmap
 
 In future, we have to add the following features (1) Use some API to find the status of the roads to the trailhead. (2) Use Maps to visualize the data and (3) has anyone does this hike recently. Right now we don't know if there are APIs to get this information. 
+
+# List of Trailheads in Washington State
+
+https://hub.arcgis.com/datasets/wa-geoservices::watrailheads-all/explore?showTable=true
