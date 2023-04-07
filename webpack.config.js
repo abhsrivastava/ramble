@@ -1,7 +1,7 @@
 const path = require('path')
 const outputDir = path.join(__dirname, "build")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
-const dotEnv = require("dotenv-webpack")
+const DotEnv = require("dotenv-webpack")
 const { publicDecrypt } = require("crypto")
 
 module.exports = {
@@ -31,7 +31,8 @@ module.exports = {
             title: "Ramble for Hikers!",
             filename: "index.html",
             template: path.join(__dirname, "src/template.html")
-        })
+        }),
+        new DotEnv()
     ],
     module: {
         rules: [
