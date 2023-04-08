@@ -24,7 +24,7 @@ lib/bs
 .merlin
 .bsb.lock
 /node_modules/
-*.*lock.json
+*-lock.json
 /build/
 /lib/
 *.bs.js

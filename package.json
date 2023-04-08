@@ -2,10 +2,10 @@
   "name": "ramble",
   "version": "0.1.0",
   "scripts": {
-    "clean": "rescript clean -with-deps",
+    "clean": "npx rescript clean -with-deps",
     "bundle": "npx webpack",
-    "build": "rescript build",
-    "watch": "rescript build -w",
+    "build": "npx rescript build",
+    "watch": "npx rescript build -w",
     "serve": "npx webpack serve"
   },
   "keywords": [
