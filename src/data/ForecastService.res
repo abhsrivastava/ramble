@@ -40,7 +40,7 @@ let parseResponse = (json: Js.Json.t) : forecast => {
   let longitude = json -> getFloatUnsafe("longitude")
   let latitude = json -> getFloatUnsafe("latitude")
   let elevation = json -> getIntUnsafe("elevation")
-  let hourlyObj = json -> getObjectUnsafe("hourly") -> Js.Json.object_
+  let hourlyObj = json -> getObjectUnsafe("hourly")
   let time = hourlyObj -> getStringArray("time")
   let temprature = hourlyObj -> getFloatArray("temperature_2m")
   let rain = hourlyObj -> getFloatArray("rain")
@@ -52,8 +52,11 @@ let parseResponse = (json: Js.Json.t) : forecast => {
 let getForecast = (longitude, latitude) => {
   open Fetch
   open Js.Promise2
+  "Came inside forecast Api" -> Js.log
   let now = Js.Date.make()
-  `${Env.apiUrl}&longitude=${longitude -> Belt.Float.toString}&latitude=${latitude -> Belt.Float.toString}&start_time=${now -> getDateString}&end_time=${now -> getEndTime}`
+  let url = `${Env.apiUrl}&longitude=${longitude -> Belt.Float.toString}&latitude=${latitude -> Belt.Float.toString}&start_time=${now -> getDateString}&end_time=${now -> getEndTime}`
+  url -> Js.log
+  url
   -> get
   -> then (Response.json)
   -> then (json => json -> parseResponse -> resolve)

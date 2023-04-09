@@ -25,7 +25,7 @@ let getObjectOption = (json: t, key) =>
   json -> getValueOption(key, decodeObject)
 
 let getObjectUnsafe = (json: t, key) => 
-  json -> getObjectOption(key) -> getExn
+  json -> getObjectOption(key) -> getExn -> object_
 
 let getIntUnsafe = (json: t, key) => 
   json -> getIntOption(key) -> getExn
