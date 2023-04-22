@@ -2,81 +2,93 @@ open ForecastService
 
 type weatherData = 
 | NotReceieved
-| Received(array<forecast>)
+| Received(array<metadata>)
 | Error
 
 type localStorageData = {
   generatedAt: float,
-  weatherData: array<forecast>
+  metadata: array<metadata>
 }
 
 let parseLocalStorage = () => {
   open Dom.Storage2
-  switch localStorage -> getItem("weather-data") {
-  | None => None
-  | Some(jsonStr) => 
-    try {
-      let json = jsonStr -> Js.Json.parseExn 
-      let jsDict = json -> Js.Json.decodeObject -> Belt.Option.getExn 
-      let generatedAt = jsDict -> Js.Dict.get("generatedAt") -> Belt.Option.getExn -> Js.Json.decodeNumber -> Belt.Option.getExn
-      if (Js.Date.now() -. generatedAt > (3. *. 60. *. 60. *. 1000.) ) {
-        None
-      } else {
-        open Util
-        let weatherData = 
-          jsDict 
-          -> Js.Dict.get("weatherData") 
-          -> Belt.Option.getExn 
-          -> Js.Json.decodeArray 
-          -> Belt.Option.getExn 
-          -> Belt.Array.map(obj => {
-            latitude: obj -> getFloatUnsafe("latitude"),
-            longitude: obj -> getFloatUnsafe("longitude"),
-            elevation: obj -> getIntUnsafe("elevation"),
-            hourly: {
-              time: obj -> getObjectUnsafe("hourly") -> getStringArray("time"),
-              temprature: obj -> getObjectUnsafe("hourly") -> getFloatArray("temprature"),
-              rain: obj -> getObjectUnsafe("hourly") -> getFloatArray("rain"),
-              showers: obj -> getObjectUnsafe("hourly") -> getFloatArray("showers"),
-              snowfall: obj -> getObjectUnsafe("hourly") -> getFloatArray("snowfall")
+  open Js.Json
+  open Belt.Option
+  localStorage -> getItem("metadata") -> flatMap (jsonStr => 
+    jsonStr -> parseExn -> decodeObject -> flatMap (json => 
+      json -> Js.Dict.get("generatedAt") -> flatMap(decodeNumber) -> flatMap(generatedAt => 
+        if (Js.Date.now() -. generatedAt > (3. *. 60. *. 60. *. 1000.) ) {
+          None
+        } else {
+          json -> Js.Dict.get("metadata") -> flatMap(decodeArray) -> map(array => array -> Belt.Array.map(item => 
+            item -> decodeObject -> flatMap(md => 
+              md -> Js.Dict.get("gridId") -> flatMap(decodeString) -> flatMap(gridId => 
+                md -> Js.Dict.get("gridX") -> flatMap(decodeNumber) -> map(Belt.Int.fromFloat) -> flatMap(gridX => 
+                  md -> Js.Dict.get("gridY") -> flatMap(decodeNumber) -> map(Belt.Int.fromFloat) -> flatMap(gridY =>
+                    md -> Js.Dict.get("forecastHourly") -> flatMap(decodeString) -> flatMap(forecastHourly =>
+                      md -> Js.Dict.get("city") -> flatMap(decodeString) -> flatMap(city =>
+                        md -> Js.Dict.get("forecastZone") -> flatMap(decodeString) -> flatMap(forecastZone =>
+                          md -> Js.Dict.get("county") -> flatMap(decodeString) -> flatMap(county =>
+                            md -> Js.Dict.get("firezone") -> flatMap(decodeString) -> flatMap(fireZone =>
+                              md -> Js.Dict.get("radarStation") -> flatMap(decodeString) -> flatMap(radarStation =>
+                                Some({gridId, gridX, gridY, forecastHourly, city, forecastZone, county, fireZone, radarStation})
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )) 
+          -> map (array => array -> Belt.Array.reduce([], (result, x) => {
+            switch x {
+            | Some(md) => [md] -> Belt.Array.concat(result)
+            | None => result
             }
-          })
-        Some(weatherData)
-      }
-    } 
-    catch {
-    | e => "Error in loading data from local storage" -> Js.log;e -> Js.log;None
-    }
-  }
+          }))
+          -> map(metadata => {generatedAt, metadata})
+        }
+      )
+    )
+  )
 }
 @react.component
 let make = () => {  
-  let (weatherData, setWeatherData) = React.useState(() => NotReceieved)
-    React.useEffect0(() => {
-      switch parseLocalStorage() {
-      | Some(wd) => "Loaded weather data from local storage" -> Js.log;setWeatherData(_ => Received(wd))
-      | None => {
-        "Data not found in localstorage going to query api" -> Js.log
-        // query the forecast api
-        TrailsDatabase.trailheadList 
-        -> Belt.Array.map(th => (th.latitude, th.longitude)) 
-        -> Belt.Array.map(((lat, long)) => ForecastService.getForecast(long, lat)) 
-        -> Js.Promise2.all 
-        -> Js.Promise2.then(wdList => {
-          // set local storage 
-          let data = {generatedAt: Js.Date.now(), weatherData: wdList}-> Js.Json.stringifyAny -> Belt.Option.getExn
+  let (metadata, setMetadata) = React.useState(() => NotReceieved)
+  React.useEffect0(() => {
+    switch parseLocalStorage() {
+    | Some(ld) => "Loaded weather data from local storage" -> Js.log;setMetadata(_ => Received(ld.metadata))
+    | None => {
+      "Data not found in localstorage going to query api" -> Js.log
+      // query the forecast api
+      TrailsDatabase.trailheadList 
+      -> Belt.Array.map(th => (th.latitude, th.longitude)) 
+      -> Belt.Array.map(((lat, long)) => ForecastService.getMetadata(lat, long)) 
+      -> Js.Promise2.all 
+      -> Js.Promise2.then(wdOptList => {
+        // set local storage 
+        wdOptList -> Util.sequence -> Belt.Option.map(wdList => {
+          let data = {generatedAt: Js.Date.now(), metadata: wdList}-> Js.Json.stringifyAny -> Belt.Option.getExn
           "going to store data" -> Js.log
           data -> Js.log
-          Dom.Storage2.localStorage -> Dom.Storage2.setItem("weather-data", data)
+          Dom.Storage2.localStorage -> Dom.Storage2.setItem("metadata", data)
           // set state
-          setWeatherData(_ => Received(wdList)) -> Js.Promise2.resolve
-        }) -> ignore
-      }}
-      None
-    })
-    
-  <div>{"App" -> React.string}</div>
-  // query entire database 
-  // store it in local storage against 3 hour key
-  // 
+          setMetadata(_ => Received(wdList))
+      }) -> Js.Promise2.resolve
+      }) -> ignore
+    }}
+    None
+  })
+  
+  switch metadata {
+  | NotReceieved => 
+    <div>{"Loading..." -> React.string}</div>
+  | Received(wd) => 
+    wd -> Js.log
+    <div>{"App" -> React.string}</div>
+  | _ => <div>{"Error" -> React.string}</div>
+  }
 }
