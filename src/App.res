@@ -1,6 +1,12 @@
+open Js.Promise2
+
 @react.component
 let make = () => {
+  React.useEffect0(() => {
+    HourlyForecastService.getHourlyForecast() -> then(x => x -> Js.log -> resolve) -> ignore
+    None
+  })
   <div>
-    {`Number of API calls ${HourlyForecastService.getHourlyForecast() -> Belt.Int.toString}` -> React.string}
+    {"Hello World" -> React.string}
   </div>
 }

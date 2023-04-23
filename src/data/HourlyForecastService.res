@@ -4,7 +4,7 @@ open Util
 type hourlyForecast = {
   startTime: Js.Date.t,
   endTime: Js.Date.t,
-  temprature: float,
+  temperature: float,
   probabilityOfPrecipitation: float,
   relativeHumidity: float,
   windspeed: float,
@@ -48,7 +48,7 @@ let parseHourlyForecast = (jsonArray) : array<hourlyForecast> => {
     periodJson -> getObjectOpt -> flatMap(period => 
       period -> getStringOpt("startTime") -> map(Js.Date.fromString) -> flatMap(startTime => 
         period -> getStringOpt("endTime") -> map(Js.Date.fromString) -> flatMap(endTime => 
-          period -> getFloatOpt("temprature") -> flatMap(temprature => 
+          period -> getFloatOpt("temperature") -> flatMap(temperature => 
             period -> getObjectByKeyOpt("probabilityOfPrecipitation") -> flatMap(x => x -> getFloatOpt("value")) -> flatMap(probabilityOfPrecipitation => 
               period -> getObjectByKeyOpt("relativeHumidity") -> flatMap(x => x -> getFloatOpt("value")) -> flatMap(relativeHumidity => 
                 period -> getFloatOpt("windSpeed") -> flatMap(windspeed => 
@@ -58,7 +58,7 @@ let parseHourlyForecast = (jsonArray) : array<hourlyForecast> => {
                       {
                         startTime,
                         endTime,
-                        temprature,
+                        temperature,
                         probabilityOfPrecipitation,
                         relativeHumidity,
                         windspeed,
@@ -97,6 +97,10 @@ let parseTrailForecast = (json, input) => {
     )
   )
 }
+
+@module("async-sema")
+external rateLimit: int => promise<unit> = "RateLimit"
+
 let getHourlyForecast = () => {
   // get a list of grouped trail metadata objects.
   // look for hourly forecast for each group in local storage. if its valid then use it. If invalid then make fresh api calls
@@ -104,7 +108,7 @@ let getHourlyForecast = () => {
   open Js.Promise2
   open Fetch
   TrailsDatabase.getTrailDatabase() 
-  -> Belt.Array.map(md => md.url -> Fetch.get -> then (Response.json) -> then(x => (md, x) -> resolve)) 
+  -> Belt.Array.map(md => rateLimit(1) -> then(_ => md.url -> Fetch.get -> then(resp => resp -> Response.json -> then(json => (md, json) -> resolve))))
   -> all
   -> then(array => array -> Belt.Array.map(((md, json)) => json -> parseTrailForecast(md)) -> resolve)
   -> then(array => array -> flatten -> resolve)
