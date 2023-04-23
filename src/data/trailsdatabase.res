@@ -15976,34 +15976,11 @@ let jsonStr = `
 ]
 `
 
-open Js.Json
+open Util
 open Belt.Option
 
-let getStringOpt = (json, key) => {
-  json -> Js.Dict.get(key) -> flatMap(decodeString)
-}
-let getFloatOpt = (json, key) => {
-  json -> Js.Dict.get(key) -> flatMap(decodeNumber)
-}
-let getIntOpt = (json, key) => {
-  json -> Js.Dict.get(key) -> flatMap(decodeNumber) -> flatMap(Belt.Int.fromFloat)
-}
-
-let getArrayOpt = (json, key) => {
-  json -> Js.Dict.get(key) -> flatMap(decodeArray)
-}
-
-let flatten = list => {
-  list -> Belt.Array.reduce([], (result, opt) => {
-    switch opt {
-    | Some(v) => result -> Belt.Array.concat([v])
-    | None => result
-    }
-  })
-}
-
 let parseTrailMetadata = json => {
-  json -> decodeObject -> flatMap(obj => 
+  json -> Js.Json.decodeObject -> flatMap(obj => 
     obj -> getStringOpt("id") -> flatMap(id => 
       obj -> getStringOpt("gridId") -> flatMap(gridId => 
         obj -> getFloatOpt("latitude") -> flatMap(latitude => 
@@ -16016,7 +15993,7 @@ let parseTrailMetadata = json => {
                       obj -> getStringOpt("forecastZone") -> flatMap(forecastZone => 
                         obj -> getStringOpt("county") -> flatMap(county => 
                           obj -> getStringOpt("radarStation") -> flatMap(radarStation => 
-                            obj -> getStringOpt("city") -> flatMap(city => 
+                            obj -> getStringOpt("city") -> map(city => 
                               {
                                 id, gridId, latitude, longitude, metadataUrl, trailhead, gridX, gridY, forecastHourly, forecastZone, county, radarStation, city
                               }
@@ -16037,15 +16014,18 @@ let parseTrailMetadata = json => {
 }
 
 let parseObject = json => {
-  json -> decodeObject -> flatMap(obj => 
+  json -> Js.Json.decodeObject -> flatMap(obj => 
     obj -> getStringOpt("url") -> flatMap(url => 
-      obj -> getArrayOpt("metadata-list") -> flatMap(parseTrailMetadata) -> flatMap(flatten) -> flatMap(metadataArray => 
+      obj -> getArrayOpt("metadata-list") -> map(arrayObj => arrayObj -> Belt.Array.map(parseTrailMetadata)) -> map(flatten) -> map(metadataArray => 
         {url, metadataArray}
       )
     )
   )
 }
 
-let parseObjectArray = json => {
-  json -> decodeArray -> flatMap(Belt.Array.map(parseObject))
-}
+let parseObjectArray = (json) : option<array<groupedMetadata>> => 
+  json -> Js.Json.decodeArray -> map(array => array -> Belt.Array.map(parseObject)) -> map(flatten)
+
+// since the trials database is a static json, the probability of it failing the parse is low. 
+// so take risk and throw exception
+let getTrailDatabase = () => jsonStr -> Js.Json.parseExn -> parseObjectArray -> getExn
