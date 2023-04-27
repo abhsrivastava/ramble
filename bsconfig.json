@@ -2,15 +2,24 @@
   "name": "ramble",
   "version": "0.1.0",
   "sources": {
-    "dir" : "src",
-    "subdirs" : true
+    "dir": "src",
+    "subdirs": true
   },
   "package-specs": {
     "module": "es6",
     "in-source": true
   },
   "suffix": ".bs.js",
-  "jsx": { "version": 4, "mode": "classic" },
-  "bs-dependencies": ["@rescript/react", "@glennsl/rescript-fetch"],
-  "reason": {"react-jsx": 3}  
+  "jsx": {
+    "version": 4,
+    "mode": "classic"
+  },
+  "bs-dependencies": [
+    "@rescript/react",
+    "@glennsl/rescript-fetch",
+    "rescript-leaflet-react"
+  ],
+  "reason": {
+    "react-jsx": 3
+  }
 }
