@@ -14,11 +14,7 @@
     "version": 4,
     "mode": "classic"
   },
-  "bs-dependencies": [
-    "@rescript/react",
-    "@glennsl/rescript-fetch",
-    "rescript-leaflet-react"
-  ],
+  "bs-dependencies": ["@rescript/react", "@glennsl/rescript-fetch"],
   "reason": {
     "react-jsx": 3
   }

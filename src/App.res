@@ -1,9 +1,15 @@
 %%raw("import './styles/App.css'")
 
+type osmParams = {
+  url: string
+}
 type osm
-@module("ol/source/OSM") @new external createOSM : unit => osm = "default"
+@module("ol/source/OSM") @new external createOSM : osmParams => osm = "default"
 
 type tileLayerParams = {
+  title: string,
+  @as("type") type_: string,
+  visible: bool,
   source: osm
 }
 type tilelayer
@@ -11,8 +17,9 @@ type tilelayer
 
 type view
 type viewParams = {
-  center: array<int>,
-  zoom: int
+  projection: string,
+  center: array<float>,
+  zoom: float
 } 
 @module("ol/View") @new external createView : viewParams => view = "default"
 
@@ -24,19 +31,19 @@ type mapParams = {
 type map
 @module("ol/Map") @new external createMap : mapParams => map = "default"
 
-let map = createMap({
-  target: "map",
-  layers: [createTileLayer({source: createOSM()})],
-  view: createView({center: [0, 0], zoom: 1})
-})
-
 @react.component
 let make = () => {
   React.useEffect0(() => {
     let _ = createMap({
       target: "map",
-      layers: [createTileLayer({source: createOSM()})],
-      view: createView({center: [0, 0], zoom: 1})
+      layers: [createTileLayer({
+        title: "OSM",
+        type_: "base",
+        visible: true,
+        source: createOSM({
+        url: "https://b.tile.opentopomap.org/{z}/{x}/{y}.png"
+      })})],
+      view: createView({projection: "EPSG:4326", center: [-121.02524898891282, 47.440536890633204], zoom: 8.7})
     })
     None
   })
