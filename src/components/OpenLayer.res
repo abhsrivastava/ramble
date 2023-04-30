@@ -1,17 +1,14 @@
-type osmParams = {
+type xyzparams = {
   url: string
 }
-type osm
-@module("ol/source/OSM") @new external createOSM : osmParams => osm = "default"
+type xyz
+@module("ol/source/XYZ") @new external createXYZ : xyzparams => xyz = "default"
 
-type tileLayerParams = {
-  title: string,
-  @as("type") type_: string,
-  visible: bool,
-  source: osm
+type tileparams = {
+  source: xyz
 }
 type tilelayer
-@module("ol/layer/Tile") @new external createTileLayer : tileLayerParams => tilelayer = "default"
+@module("ol/layer/Tile") @new external createTileLayer : tileparams => tilelayer = "default"
 
 type view
 type viewParams = {
