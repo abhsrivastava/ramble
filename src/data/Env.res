@@ -1,2 +1,1 @@
-@val @scope(("process", "env")) external apiUrl : string = "API_URL"
-@val @scope(("process", "env")) external googleMapsUrl : string = "GOOGLE_MAPS_URL"
+@val @scope(("process", "env")) external usTopoMap: string = "US_TOPO_MAP"

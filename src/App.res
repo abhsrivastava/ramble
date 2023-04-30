@@ -80,7 +80,7 @@ let make = () => {
     let style = createStyle({image: createIcon({color: "#BADA55", crossOrigin: "anonymous", src: "images/hiking.png", scale: 0.2})})
     let _ = feature -> setStyle(style)
     let vectorSource = createVectorSource({features: [feature]})
-    let osm = createOSM({ url: "https://b.tile.opentopomap.org/{z}/{x}/{y}.png"})
+    let osm = createOSM({ url: Env.usTopoMap})
     let tileLayer = createTileLayer({title: "OSM", type_: "base", visible: true, source: osm})
     let vectorLayer = VectorLayer(createVectorLayer({source: vectorSource}))
     let _ = createMap({
