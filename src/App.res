@@ -16,7 +16,9 @@ let createVectorSource = (tupleList : array<(float, float)>) : vectorsource => {
 @react.component
 let make = () => {
   React.useEffect0(() => {
-    let vectorsource = createVectorSource([(-121.08700000094, 47.9176999997368)])
+    let vectorsource = TrailsDatabase.getTrailDatabase() 
+      -> Belt.Array.flatMap( groupedMetadata => groupedMetadata.metadataArray -> Belt.Array.map(md => (md.longitude, md.latitude)))
+      -> createVectorSource
     let osm = createOSM({ url: Env.usTopoMap})
     let tileLayer = Layer.tileLayer(createTileLayer({title: "OSM", type_: "base", visible: true, source: osm}))
     let vectorLayer = Layer.vectorLayer(createVectorLayer({source: vectorsource}))
