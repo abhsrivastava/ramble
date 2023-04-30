@@ -14,7 +14,8 @@ type view
 type viewParams = {
   projection: string,
   center: array<float>,
-  zoom: float
+  zoom: float,
+  maxZoom: int
 } 
 @module("ol/View") @new external createView : viewParams => view = "default"
 

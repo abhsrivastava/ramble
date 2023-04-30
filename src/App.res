@@ -24,7 +24,7 @@ let make = () => {
     let _ = createMap({
       target: "map",
       layers: [tileLayer, vectorLayer],
-      view: createView({projection: "EPSG:4326", center: [-121.02524898891282, 47.440536890633204], zoom: 8.7})
+      view: createView({projection: "EPSG:4326", center: [-121.02524898891282, 47.440536890633204], zoom: 8.7, maxZoom: 16})
     })
     None
   })
