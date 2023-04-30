@@ -23,11 +23,8 @@ type viewParams = {
 } 
 @module("ol/View") @new external createView : viewParams => view = "default"
 
-type pointinput
-@module("ol/proj") @val external fromLonLat : array<float> => pointinput = "fromLonLat"
-
 type point
-@module("ol/geom/Point") @new external createPoint : pointinput => point = "default"
+@module("ol/geom/Point") @new external createPoint : array<float> => point = "default"
 
 type featureinput = {
   geometry: point
@@ -61,31 +58,34 @@ type vectorparam = {
 type vectorlayer
 @module("ol/layer") @new external createVectorLayer: vectorparam => vectorlayer = "Vector"
 
-type layer = 
-| TileLayer(tilelayer)
-| VectorLayer(vectorlayer)
+module Layer = {
+  type t
+  external tileLayer : tilelayer => t = "%identity"
+  external vectorLayer : vectorlayer => t = "%identity"
+}
 
 type mapParams = {
   target: string,
-  layers: array<tilelayer>,
+  layers: array<Layer.t>,
   view: view
 }
 type map
 @module("ol/Map") @new external createMap : mapParams => map = "default"
+@module("./images/hiking.png") @val external hikingImage : string = "default"
 
 @react.component
 let make = () => {
   React.useEffect0(() => {
-    let feature = createFeature({geometry: {createPoint(fromLonLat([-121.08700000094, 47.9176999997368]))}})
-    let style = createStyle({image: createIcon({color: "#BADA55", crossOrigin: "anonymous", src: "images/hiking.png", scale: 0.2})})
+    let feature = createFeature({geometry: {createPoint([-121.08700000094, 47.9176999997368])}})
+    let style = createStyle({image: createIcon({color: "#BADA55", crossOrigin: "anonymous", src: {hikingImage}, scale: 0.2})})
     let _ = feature -> setStyle(style)
     let vectorSource = createVectorSource({features: [feature]})
     let osm = createOSM({ url: Env.usTopoMap})
-    let tileLayer = createTileLayer({title: "OSM", type_: "base", visible: true, source: osm})
-    let vectorLayer = VectorLayer(createVectorLayer({source: vectorSource}))
+    let tileLayer = Layer.tileLayer(createTileLayer({title: "OSM", type_: "base", visible: true, source: osm}))
+    let vectorLayer = Layer.vectorLayer(createVectorLayer({source: vectorSource}))
     let _ = createMap({
       target: "map",
-      layers: [tileLayer],
+      layers: [tileLayer, vectorLayer],
       view: createView({projection: "EPSG:4326", center: [-121.02524898891282, 47.440536890633204], zoom: 8.7})
     })
     None

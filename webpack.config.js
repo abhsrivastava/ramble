@@ -1,21 +1,21 @@
-const path = require('path')
-const outputDir = path.join(__dirname, "build")
-const HtmlWebpackPlugin = require("html-webpack-plugin")
-const DotEnv = require("dotenv-webpack")
-const { publicDecrypt } = require("crypto")
+const path = require("path");
+const outputDir = path.join(__dirname, "build");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const DotEnv = require("dotenv-webpack");
+const { publicDecrypt } = require("crypto");
 
 module.exports = {
   mode: "development",
   watch: true,
   entry: {
-    index: path.join(__dirname, "src/Index.bs.js")
+    index: path.join(__dirname, "src/Index.bs.js"),
   },
   output: {
     path: outputDir,
     publicPath: "/",
     filename: "[name][contenthash].js",
-    assetModuleFilename: '[name][ext]',
-    clean: true
+    assetModuleFilename: "[path][name].[hash][ext][query]",
+    clean: true,
   },
   devtool: "inline-source-map",
   devServer: {
@@ -24,27 +24,27 @@ module.exports = {
     compress: true,
     port: 8001,
     static: {
-      directory: outputDir
-    }
+      directory: outputDir,
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
       title: "Ramble for Hikers!",
       filename: "index.html",
-      template: path.join(__dirname, "src/template.html")
+      template: path.join(__dirname, "src/template.html"),
     }),
-    new DotEnv()
+    new DotEnv(),
   ],
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(svg|jpg|jpeg|gif|tiff|png|webp|ico)$/,
         type: "asset/resource",
-      }
-    ]
-  }
-}
+      },
+    ],
+  },
+};
