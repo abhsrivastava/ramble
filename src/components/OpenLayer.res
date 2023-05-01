@@ -23,10 +23,12 @@ type point
 @module("ol/geom/Point") @new external createPoint : array<float> => point = "default"
 
 type featureinput = {
+  id: string,
   geometry: point
 }
 type feature 
 @module("ol/Feature") @new external createFeature : featureinput => feature = "default"
+@send external get : (feature, string) => string = "get"
 
 type icon 
 type iconparam = {
@@ -67,3 +69,15 @@ type mapParams = {
 }
 type map
 @module("ol/Map") @new external createMap : mapParams => map = "default"
+
+type selectparam = {
+  layers: array<Layer.t>
+}
+type select
+@module("ol/interaction/Select") @new external createSelect : selectparam => select = "default"
+
+@send external addInteraction: (map, select) => unit = "addInteraction"
+type event = {
+  selected: array<feature>
+}
+@send external on: (select, string, (event) => unit) => unit = "on"
